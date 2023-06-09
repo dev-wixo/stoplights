@@ -9,7 +9,8 @@ info:
   contact:
     name: UDF Team
 servers:
-  - url: 'http://localhost:3000'
+  - url: 'http://localhost'
+    description: Local File Service
 paths:
   /api/files:
     get:
@@ -102,6 +103,8 @@ paths:
                   description: The binary of the file.
               required:
                 - fileName
+      tags:
+        - files
     delete:
       summary: Delete File
       operationId: delete-api-files
@@ -121,6 +124,8 @@ paths:
                   description: The location of the file want to be delete
               required:
                 - filePath
+      tags:
+        - files
   '/api/files/:download':
     post:
       summary: Download File
