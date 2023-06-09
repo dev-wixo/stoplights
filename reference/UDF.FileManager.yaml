@@ -6,13 +6,16 @@ info:
   version: '1.0'
   summary: UDF File Manager Service
   description: UDF File Manager Service
+  contact:
+    name: UDF Team
 servers:
   - url: 'http://localhost:3000'
 paths:
   /api/files:
     get:
       summary: List Files and Folder
-      tags: []
+      tags:
+        - files
       responses:
         '200':
           description: OK
@@ -141,6 +144,8 @@ paths:
                   type: string
               required:
                 - filePath
+      tags:
+        - files
 components:
   schemas: {}
   securitySchemes:
