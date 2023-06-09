@@ -5,186 +5,122 @@ info:
   title: UDF.FileManager
   version: '1.0'
   summary: UDF File Manager Service
+  description: UDF File Manager Service
 servers:
   - url: 'http://localhost:3000'
 paths:
-  '/users/{userId}':
-    parameters:
-      - schema:
-          type: integer
-        name: userId
-        in: path
-        required: true
-        description: Id of an existing user.
+  /api/files:
     get:
-      summary: Get User Info by User ID
+      summary: List Files and Folder
       tags: []
       responses:
         '200':
-          description: User Found
+          description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-              examples:
-                Get User Alice Smith:
-                  value:
-                    id: 142
-                    firstName: Alice
-                    lastName: Smith
-                    email: alice.smith@gmail.com
-                    dateOfBirth: '1997-10-31'
-                    emailVerified: true
-                    signUpDate: '2019-08-24'
-        '404':
-          description: User Not Found
-      operationId: get-users-userId
-      description: Retrieve the information of the user with the matching user ID.
-    patch:
-      summary: Update User Information
-      operationId: patch-users-userId
-      responses:
-        '200':
-          description: User Updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-              examples:
-                Updated User Rebecca Baker:
-                  value:
-                    id: 13
-                    firstName: Rebecca
-                    lastName: Baker
-                    email: rebecca@gmail.com
-                    dateOfBirth: '1985-10-02'
-                    emailVerified: false
-                    createDate: '2019-08-24'
-        '404':
-          description: User Not Found
-        '409':
-          description: Email Already Taken
-      description: Update the information of an existing user.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                firstName:
-                  type: string
-                lastName:
-                  type: string
-                email:
-                  type: string
-                  description: 'If a new email is given, the user''s email verified property will be set to false.'
-                dateOfBirth:
-                  type: string
-            examples:
-              Update First Name:
-                value:
-                  firstName: Rebecca
-              Update Email:
-                value:
-                  email: rebecca@gmail.com
-              Update Last Name & Date of Birth:
-                value:
-                  lastName: Baker
-                  dateOfBirth: '1985-10-02'
-        description: Patch user properties to update.
-  /user:
+                type: object
+                properties:
+                  pageToken:
+                    type: string
+                    description: The token to get next page of the files.
+                  files:
+                    type: array
+                    description: the list of files.
+                    items:
+                      type: string
+      operationId: get-api-files
+      description: List File and Folders
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: path
+          description: the prefix path of the folder would like to get files
+        - schema:
+            type: number
+            default: 100
+          in: query
+          name: pagesize
+          description: the number of files will be return for each request.
+        - schema:
+            type: string
+          in: query
+          name: pageToken
+          description: provide this token to get next page.
     post:
-      summary: Create New User
-      operationId: post-user
+      summary: Upload File
+      operationId: post-api-files
       responses:
         '200':
-          description: User Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-              examples:
-                New User Bob Fellow:
-                  value:
-                    id: 12
-                    firstName: Bob
-                    lastName: Fellow
-                    email: bob.fellow@gmail.com
-                    dateOfBirth: '1996-08-24'
-                    emailVerified: false
-                    createDate: '2020-11-18'
-        '400':
-          description: Missing Required Information
-        '409':
-          description: Email Already Taken
+          description: OK
+      description: Upload File
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: using the form data to allow to upload file as a stream
+              properties:
+                fileName:
+                  type: string
+                  description: the name and extension of the file
+                path:
+                  type: string
+                  description: the folder to store the file. If not provided the file will be uploaded into the Root folder.
+                fileData:
+                  type: object
+                  description: The binary of the file.
+              required:
+                - fileName
+    delete:
+      summary: Delete File
+      operationId: delete-api-files
+      responses:
+        '200':
+          description: OK
+      description: This will be a soft delete files by moving files to a archive folder with prefix is Archive_OriginalFileName_Timestamp.ext
+      parameters: []
       requestBody:
         content:
           application/json:
             schema:
               type: object
               properties:
-                firstName:
+                filePath:
                   type: string
-                lastName:
-                  type: string
-                email:
-                  type: string
-                dateOfBirth:
-                  type: string
-                  format: date
+                  description: The location of the file want to be delete
               required:
-                - firstName
-                - lastName
-                - email
-                - dateOfBirth
-            examples:
-              Create User Bob Fellow:
-                value:
-                  firstName: Bob
-                  lastName: Fellow
-                  email: bob.fellow@gmail.com
-                  dateOfBirth: '1996-08-24'
-        description: Post the necessary fields for the API to create a new user.
-      description: Create a new user.
+                - filePath
+  '/api/files/:download':
+    post:
+      summary: Download File
+      operationId: 'post-api-files-:download'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The File stream + file name
+      description: Download file
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filePath:
+                  type: string
+              required:
+                - filePath
 components:
-  schemas:
-    User:
-      title: User
-      type: object
-      description: ''
-      examples:
-        - id: 142
-          firstName: Alice
-          lastName: Smith
-          email: alice.smith@gmail.com
-          dateOfBirth: '1997-10-31'
-          emailVerified: true
-          signUpDate: '2019-08-24'
-      properties:
-        id:
-          type: integer
-          description: Unique identifier for the given user.
-        firstName:
-          type: string
-        lastName:
-          type: string
-        email:
-          type: string
-          format: email
-        dateOfBirth:
-          type: string
-          format: date
-          example: '1997-10-31'
-        emailVerified:
-          type: boolean
-          description: Set to true if the user's email has been verified.
-        createDate:
-          type: string
-          format: date
-          description: The date that the user was created.
-      required:
-        - id
-        - firstName
-        - lastName
-        - email
-        - emailVerified
+  schemas: {}
+  securitySchemes:
+    Authorization:
+      name: Bearer Token
+      type: apiKey
+      in: header
+security:
+  - Authorization: []
