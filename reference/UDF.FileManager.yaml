@@ -54,6 +54,32 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  filePath:
+                    type: string
+                    description: The path of uploaded file.
+                required:
+                  - filePath
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: string
+                  errorMessage:
+                    type: string
+              examples:
+                File Existed:
+                  value:
+                    errorCode: File_Existed
+                    errorMessage: The uploading file name is existed
       description: Upload File
       requestBody:
         content:
